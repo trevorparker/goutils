@@ -92,10 +92,7 @@ func head(file io.Reader, args arg) {
 func main() {
 	args := arg{10, 0, []string{}}
 	reached_files := false
-	for i := 0; i < len(os.Args); i++ {
-		if i == 0 {
-			continue
-		}
+	for i := 1; i < len(os.Args); i++ {
 		if reached_files == false {
 			var err error
 			if os.Args[i] == "-h" || os.Args[i] == "--help" {
