@@ -54,7 +54,7 @@ func cat(file io.Reader, args arg) {
 		n, err := r.Read(buf)
 
 		if err == io.EOF {
-			os.Exit(0)
+			return
 		} else if err != nil {
 			panic(err)
 		}
