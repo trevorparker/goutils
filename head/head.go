@@ -1,10 +1,10 @@
 // head -- print the front matter of file(s) or standard input
 // Part of goutils (https://github.com/trevorparker/goutils)
 //
-// Copyright (c) 2013 Trevor Parker <trevor@trevorparker.com>
+// Copyright (c) 2013-2014 Trevor Parker <trevor@trevorparker.com>
 // All rights reserved
 //
-// Distributed under the terms of the modified BSD license (see LICENSE)
+// Distributed under the terms of the Modified BSD License (see LICENSE)
 
 package main
 

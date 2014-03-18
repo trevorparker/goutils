@@ -4,7 +4,7 @@
 // Copyright (c) 2014 Trevor Parker <trevor@trevorparker.com>
 // All rights reserved
 //
-// Distributed under the terms of the modified BSD license (see LICENSE)
+// Distributed under the terms of the Modified BSD License (see LICENSE)
 
 package main
 
