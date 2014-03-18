@@ -28,6 +28,8 @@ const help_message string = `Concatenate and print FILE or STDIN to STDOUT.
   -h, --help                print this help message and exit
 `
 
+const newline rune = 10
+
 func usage(error string) {
 	fmt.Fprintf(os.Stderr, "cat: %s\n%s\n", error, usage_message)
 	os.Exit(1)
@@ -43,16 +45,12 @@ func cat(file io.Reader, args arg) {
 		file = os.Stdin
 	}
 	r := bufio.NewReader(file)
-	buf := make([]byte, 16)
 
-	line_number := 1
-	newline, _ := utf8.DecodeRune([]byte("\n"))
-
-	if args.line_numbers {
-		fmt.Printf("%6d  ", line_number)
-	}
+	line_number := 0
+	newline_next := true
 
 	for {
+		buf := make([]byte, 16)
 		n, err := r.Read(buf)
 
 		if err == io.EOF {
@@ -61,22 +59,21 @@ func cat(file io.Reader, args arg) {
 			panic(err)
 		}
 
-		newline_next := false
 		for i := 0; i < n; i++ {
 			this_rune, _ := utf8.DecodeRune(buf[i : i+1])
+
+			if args.line_numbers && newline_next == true {
+				line_number++
+				fmt.Printf("%6d\t", line_number)
+				newline_next = false
+			}
+
 			if this_rune == newline {
 				newline_next = true
 			}
 
-			print(string(buf[i]))
-
-			if newline_next == true && args.line_numbers {
-				line_number++
-				fmt.Printf("%6d  ", line_number)
-				newline_next = false
-			}
+			os.Stdout.Write(buf[i : i+1])
 		}
-
 	}
 }
 
