@@ -75,7 +75,7 @@ func head(file io.Reader, args arg) {
 			}
 			buffer.WriteByte(c)
 		}
-		print(buffer.String())
+		os.Stdout.Write([]byte(buffer.String()))
 	} else {
 		for l := 0; l < args.count; l++ {
 			l, err := r.ReadBytes('\n')
@@ -84,7 +84,7 @@ func head(file io.Reader, args arg) {
 			} else if err != nil {
 				panic(err)
 			}
-			print(string(l))
+			os.Stdout.Write([]byte(string(l)))
 		}
 	}
 }

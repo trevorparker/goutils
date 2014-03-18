@@ -62,7 +62,7 @@ func main() {
 			case 'b':
 				c, _ = utf8.DecodeRune([]byte("\b"))
 			case 'c':
-				print(b.String())
+				os.Stdout.Write([]byte(b.String()))
 				os.Exit(0)
 			case 'e':
 				c, _ = utf8.DecodeRune([]byte("\x1B"))
@@ -84,5 +84,5 @@ func main() {
 		}
 		b.WriteRune(c)
 	}
-	print(b.String() + trailing)
+	os.Stdout.Write([]byte(b.String() + trailing))
 }
