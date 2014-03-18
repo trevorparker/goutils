@@ -17,13 +17,15 @@ import (
 )
 
 type arg struct {
-	file         []string
-	line_numbers bool
+	file                  []string
+	nonblank_line_numbers bool
+	line_numbers          bool
 }
 
 const usage_message string = "usage: cat [OPTION ...] [FILE ...]"
 const help_message string = `Concatenate and print FILE or STDIN to STDOUT.
 
+  -b, --number-nonblank     number only non-blank lines
   -n, --number              number output lines, starting with 1
   -h, --help                print this help message and exit
 `
@@ -63,9 +65,11 @@ func cat(file io.Reader, args arg) {
 			this_rune, _ := utf8.DecodeRune(buf[i : i+1])
 
 			if args.line_numbers && newline_next == true {
-				line_number++
-				fmt.Printf("%6d\t", line_number)
-				newline_next = false
+				if this_rune != newline || !args.nonblank_line_numbers {
+					line_number++
+					fmt.Printf("%6d\t", line_number)
+					newline_next = false
+				}
 			}
 
 			if this_rune == newline {
@@ -78,13 +82,18 @@ func cat(file io.Reader, args arg) {
 }
 
 func main() {
-	args := arg{[]string{}, false}
+	args := arg{[]string{}, false, false}
 	reached_files := false
 
 	for i := 1; i < len(os.Args); i++ {
 		if reached_files == false {
 			if os.Args[i] == "-h" || os.Args[i] == "--help" {
 				help()
+			}
+			if os.Args[i] == "-b" || os.Args[i] == "--number-nonblank" {
+				args.nonblank_line_numbers = true
+				args.line_numbers = true
+				continue
 			}
 			if os.Args[i] == "-n" || os.Args[i] == "--number" {
 				args.line_numbers = true
