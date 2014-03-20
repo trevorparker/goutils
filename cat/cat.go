@@ -20,6 +20,7 @@ type arg struct {
 	file                  []string
 	nonblank_line_numbers bool
 	line_numbers          bool
+	squeeze_blank         bool
 }
 
 const usage_message string = "usage: cat [OPTION ...] [FILE ...]"
@@ -27,6 +28,7 @@ const help_message string = `Concatenate and print FILE or STDIN to STDOUT.
 
   -b, --number-nonblank     number only non-blank lines
   -n, --number              number output lines, starting with 1
+  -s, --squeeze-blank       print no more than one consecutive blank line
   -h, --help                print this help message and exit
 `
 
@@ -51,6 +53,8 @@ func cat(file io.Reader, args arg) {
 	line_number := 0
 	newline_next := true
 
+	prev_rune := []rune{0, 0}
+
 	for {
 		buf := make([]byte, 16)
 		n, err := r.Read(buf)
@@ -63,6 +67,15 @@ func cat(file io.Reader, args arg) {
 
 		for i := 0; i < n; i++ {
 			this_rune, _ := utf8.DecodeRune(buf[i : i+1])
+
+			// Identify and squeeze blank lines
+			if args.squeeze_blank && prev_rune[0] == newline {
+				if this_rune == newline && prev_rune[0] == prev_rune[1] {
+					continue
+				}
+			}
+
+			prev_rune = []rune{this_rune, prev_rune[0]}
 
 			if args.line_numbers && newline_next == true {
 				if this_rune != newline || !args.nonblank_line_numbers {
@@ -82,7 +95,7 @@ func cat(file io.Reader, args arg) {
 }
 
 func main() {
-	args := arg{[]string{}, false, false}
+	args := arg{[]string{}, false, false, false}
 	reached_files := false
 
 	for i := 1; i < len(os.Args); i++ {
@@ -97,6 +110,10 @@ func main() {
 			}
 			if os.Args[i] == "-n" || os.Args[i] == "--number" {
 				args.line_numbers = true
+				continue
+			}
+			if os.Args[i] == "-s" || os.Args[i] == "--squeeze-blank" {
+				args.squeeze_blank = true
 				continue
 			}
 		}
