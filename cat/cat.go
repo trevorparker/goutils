@@ -95,7 +95,7 @@ func cat(file io.Reader, args arg) {
 }
 
 func main() {
-	args := arg{[]string{}, false, false, false}
+	args := arg{}
 	reached_files := false
 
 	for i := 1; i < len(os.Args); i++ {
