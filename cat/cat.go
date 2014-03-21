@@ -20,6 +20,7 @@ type arg struct {
 	file                  []string
 	nonblank_line_numbers bool
 	line_numbers          bool
+	show_line_endings     bool
 	squeeze_blank         bool
 }
 
@@ -87,6 +88,9 @@ func cat(file io.Reader, args arg) {
 
 			if this_rune == newline {
 				newline_next = true
+				if args.show_line_endings {
+					os.Stdout.Write([]byte("$"))
+				}
 			}
 
 			os.Stdout.Write(buf[i : i+1])
@@ -106,6 +110,10 @@ func main() {
 			if os.Args[i] == "-b" || os.Args[i] == "--number-nonblank" {
 				args.nonblank_line_numbers = true
 				args.line_numbers = true
+				continue
+			}
+			if os.Args[i] == "-E" || os.Args[i] == "--show-ends" {
+				args.show_line_endings = true
 				continue
 			}
 			if os.Args[i] == "-n" || os.Args[i] == "--number" {
