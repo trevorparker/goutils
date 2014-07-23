@@ -28,6 +28,7 @@ const usage_message string = "usage: cat [OPTION ...] [FILE ...]"
 const help_message string = `Concatenate and print FILE or STDIN to STDOUT.
 
   -b, --number-nonblank     number only non-blank lines
+  -E, --show-ends           print $ at the end of each line
   -n, --number              number output lines, starting with 1
   -s, --squeeze-blank       print no more than one consecutive blank line
   -h, --help                print this help message and exit
