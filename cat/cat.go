@@ -22,6 +22,7 @@ type arg struct {
 	line_numbers          bool
 	show_line_endings     bool
 	squeeze_blank         bool
+	show_tabs             bool
 }
 
 const usage_message string = "usage: cat [OPTION ...] [FILE ...]"
@@ -31,9 +32,11 @@ const help_message string = `Concatenate and print FILE or STDIN to STDOUT.
   -E, --show-ends           print $ at the end of each line
   -n, --number              number output lines, starting with 1
   -s, --squeeze-blank       print no more than one consecutive blank line
+  -T, --show-tabs           print tab character as ^I
   -h, --help                print this help message and exit
 `
 
+const tab rune = 9
 const newline rune = 10
 
 func usage(error string) {
@@ -87,7 +90,10 @@ func cat(file io.Reader, args arg) {
 				}
 			}
 
-			if this_rune == newline {
+			if args.show_tabs && this_rune == tab {
+				os.Stdout.Write([]byte("^I"))
+				continue
+			} else if this_rune == newline {
 				newline_next = true
 				if args.show_line_endings {
 					os.Stdout.Write([]byte("$"))
@@ -123,6 +129,10 @@ func main() {
 			}
 			if os.Args[i] == "-s" || os.Args[i] == "--squeeze-blank" {
 				args.squeeze_blank = true
+				continue
+			}
+			if os.Args[i] == "-T" || os.Args[i] == "--show-tabs" {
+				args.show_tabs = true
 				continue
 			}
 		}
