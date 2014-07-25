@@ -54,14 +54,16 @@ func cat(file io.Reader, args arg) {
 		file = os.Stdin
 	}
 	r := bufio.NewReader(file)
+	w := bufio.NewWriterSize(os.Stdout, 512)
 
 	line_number := 0
 	newline_next := true
 
 	prev_rune := []rune{0, 0}
 
+	buf := make([]byte, 512)
+
 	for {
-		buf := make([]byte, 16)
 		n, err := r.Read(buf)
 
 		if err == io.EOF {
@@ -85,23 +87,25 @@ func cat(file io.Reader, args arg) {
 			if args.line_numbers && newline_next == true {
 				if this_rune != newline || !args.nonblank_line_numbers {
 					line_number++
-					fmt.Printf("%6d\t", line_number)
+					fmt.Fprintf(w, "%6d\t", line_number)
 					newline_next = false
 				}
 			}
 
 			if args.show_tabs && this_rune == tab {
-				os.Stdout.Write([]byte("^I"))
+				w.Write([]byte("^I"))
 				continue
 			} else if this_rune == newline {
 				newline_next = true
 				if args.show_line_endings {
-					os.Stdout.Write([]byte("$"))
+					w.Write([]byte("$"))
 				}
 			}
 
-			os.Stdout.Write(buf[i : i+1])
+			w.Write([]byte(buf[i : i+1]))
 		}
+
+		w.Flush()
 	}
 }
 
