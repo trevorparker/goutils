@@ -139,6 +139,13 @@ func main() {
 				args.show_tabs = true
 				continue
 			}
+			if os.Args[i] == "--" {
+				reached_files = true
+				continue
+			}
+			if os.Args[i] == "-" {
+				reached_files = true
+			}
 		}
 		reached_files = true
 		arg_v := os.Args[i]
@@ -149,11 +156,15 @@ func main() {
 		cat(nil, args)
 	} else {
 		for i := range args.file {
-			file, err := os.Open(args.file[i])
-			if err != nil {
-				panic(err)
+			if args.file[i] == "-" {
+				cat(nil, args)
+			} else {
+				file, err := os.Open(args.file[i])
+				if err != nil {
+					panic(err)
+				}
+				cat(file, args)
 			}
-			cat(file, args)
 		}
 	}
 }
