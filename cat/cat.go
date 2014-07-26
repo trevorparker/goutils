@@ -39,6 +39,8 @@ const help_message string = `Concatenate and print FILE or STDIN to STDOUT.
 const tab rune = 9
 const newline rune = 10
 
+var quick bool = true
+
 func usage(error string) {
 	fmt.Fprintf(os.Stderr, "cat: %s\n%s\n", error, usage_message)
 	os.Exit(1)
@@ -53,6 +55,12 @@ func cat(file io.Reader, args arg) {
 	if file == nil {
 		file = os.Stdin
 	}
+
+	if quick {
+		io.Copy(os.Stdout, file)
+		return
+	}
+
 	r := bufio.NewReader(file)
 	w := bufio.NewWriterSize(os.Stdout, 512)
 
@@ -121,22 +129,27 @@ func main() {
 			if os.Args[i] == "-b" || os.Args[i] == "--number-nonblank" {
 				args.nonblank_line_numbers = true
 				args.line_numbers = true
+				quick = false
 				continue
 			}
 			if os.Args[i] == "-E" || os.Args[i] == "--show-ends" {
 				args.show_line_endings = true
+				quick = false
 				continue
 			}
 			if os.Args[i] == "-n" || os.Args[i] == "--number" {
 				args.line_numbers = true
+				quick = false
 				continue
 			}
 			if os.Args[i] == "-s" || os.Args[i] == "--squeeze-blank" {
 				args.squeeze_blank = true
+				quick = false
 				continue
 			}
 			if os.Args[i] == "-T" || os.Args[i] == "--show-tabs" {
 				args.show_tabs = true
+				quick = false
 				continue
 			}
 			if os.Args[i] == "--" {
