@@ -25,8 +25,9 @@ type arg struct {
 	show_tabs             bool
 }
 
-const usage_message string = "usage: cat [OPTION ...] [FILE ...]"
-const help_message string = `Concatenate and print FILE or STDIN to STDOUT.
+const (
+	usage_message string = "usage: cat [OPTION ...] [FILE ...]"
+	help_message  string = `Concatenate and print FILE or STDIN to STDOUT.
 
   -b, --number-nonblank     number only non-blank lines
   -E, --show-ends           print $ at the end of each line
@@ -35,9 +36,9 @@ const help_message string = `Concatenate and print FILE or STDIN to STDOUT.
   -T, --show-tabs           print tab character as ^I
   -h, --help                print this help message and exit
 `
-
-const tab rune = 9
-const newline rune = 10
+	tab     rune = 9
+	newline rune = 10
+)
 
 var quick bool = true
 

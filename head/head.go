@@ -24,8 +24,9 @@ type arg struct {
 	file  []string
 }
 
-const usage_message string = "usage: head [OPTION ...] [FILE ...]"
-const help_message string = `Print the front matter of FILE or STDIN.
+const (
+	usage_message string = "usage: head [OPTION ...] [FILE ...]"
+	help_message  string = `Print the front matter of FILE or STDIN.
 A header describing the file name is prefixed when multiple files are passed
 in. When no FILE is provided, read from STDIN.
 
@@ -34,6 +35,7 @@ in. When no FILE is provided, read from STDIN.
                                 default 10
   -h, --help                print this help message and exit
 `
+)
 
 func usage(error string) {
 	fmt.Fprintf(os.Stderr, "head: %s\n%s\n", error, usage_message)

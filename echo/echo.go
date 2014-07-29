@@ -16,13 +16,15 @@ import (
 	"unicode/utf8"
 )
 
-const usage_message string = "usage: echo [OPTION ...] [STRING ...]"
-const help_message string = `Print STRING arguments to STDOUT.
+const (
+	usage_message string = "usage: echo [OPTION ...] [STRING ...]"
+	help_message  string = `Print STRING arguments to STDOUT.
 Backslash escape sequences in STRING are interpreted.
 
   -n,                       do not print a trailing newline character
   -h, --help                print this help message and exit
 `
+)
 
 func usage(error string) {
 	fmt.Fprintf(os.Stderr, "echo: %s\n%s\n", error, usage_message)
