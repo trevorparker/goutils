@@ -48,6 +48,9 @@ func wc(file io.Reader, args arg, size int64) int64 {
 
 	if file == nil {
 		file = os.Stdin
+	}
+
+	if c == 0 && args.count_bytes {
 		s := bufio.NewScanner(file)
 		s.Split(bufio.ScanBytes)
 		for s.Scan() {
