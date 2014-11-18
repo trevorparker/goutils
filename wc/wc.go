@@ -63,22 +63,28 @@ func wc(file io.Reader, args arg) int {
 		file = os.Stdin
 	}
 
-	count := 0
-	complete := false
+	c := 0
 
-	r := bufio.NewReader(file)
-	for complete == false {
-		b, err := r.ReadByte()
-		if err != nil {
-			complete = true
-		} else if args.count_bytes {
-			if b != 0 {
-				count++
-			}
+	s := bufio.NewScanner(file)
+
+	if args.count_bytes {
+		s.Split(bufio.ScanBytes)
+		for s.Scan() {
+			c++
+		}
+	} else if args.count_lines {
+		s.Split(bufio.ScanLines)
+		for s.Scan() {
+			c++
+		}
+	} else if args.count_words {
+		s.Split(bufio.ScanWords)
+		for s.Scan() {
+			c++
 		}
 	}
 
-	return count
+	return c
 }
 
 func main() {
@@ -94,12 +100,10 @@ func main() {
 				continue
 			}
 			if os.Args[i] == "-l" || os.Args[i] == "--lines" {
-				usage("not implemented")
 				args.count_lines = true
 				continue
 			}
 			if os.Args[i] == "-w" || os.Args[i] == "--words" {
-				usage("not implemented")
 				args.count_words = true
 				continue
 			}
