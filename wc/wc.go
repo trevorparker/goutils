@@ -43,26 +43,28 @@ func help() {
 	os.Exit(0)
 }
 
-func wc(file io.Reader, args arg) int {
+func wc(file io.Reader, args arg, size int64) int64 {
+	c := size
+
 	if file == nil {
 		file = os.Stdin
-	}
-
-	c := 0
-
-	s := bufio.NewScanner(file)
-
-	if args.count_bytes {
+		s := bufio.NewScanner(file)
 		s.Split(bufio.ScanBytes)
 		for s.Scan() {
 			c++
 		}
-	} else if args.count_lines {
+	}
+
+	if args.count_lines && !args.count_bytes {
+		c = 0
+		s := bufio.NewScanner(file)
 		s.Split(bufio.ScanLines)
 		for s.Scan() {
 			c++
 		}
-	} else if args.count_words {
+	} else if args.count_words && !args.count_bytes {
+		c = 0
+		s := bufio.NewScanner(file)
 		s.Split(bufio.ScanWords)
 		for s.Scan() {
 			c++
@@ -98,15 +100,17 @@ func main() {
 		args.file = append(args.file, arg_v)
 	}
 	if len(args.file) == 0 {
-		count := wc(nil, args)
+		count := wc(nil, args, 0)
 		fmt.Fprintf(os.Stdout, "%d\n", count)
 	} else {
 		for i := range args.file {
 			file, err := os.Open(args.file[i])
+			stat, err := file.Stat()
+			size := stat.Size()
 			if err != nil {
 				panic(err)
 			}
-			count := wc(file, args)
+			count := wc(file, args, size)
 			fmt.Fprintf(os.Stdout, "%d %s\n", count, args.file[i])
 		}
 	}
