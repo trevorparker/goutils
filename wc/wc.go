@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 )
 
 type arg struct {
@@ -42,20 +41,6 @@ func usage(error string) {
 func help() {
 	fmt.Printf("%s\n%s", usage_message, help_message)
 	os.Exit(0)
-}
-
-func parse_args(args []string, i *int, s string, l string) (arg_v string) {
-	if strings.HasPrefix(args[*i], s) || strings.HasPrefix(args[*i], l) {
-		arg_v := strings.Trim(args[*i], s)
-		if len(arg_v) == 0 && len(args)-1 > *i {
-			*i++
-			arg_v = args[*i]
-		} else if len(arg_v) == 0 {
-			usage("option requires value -- " + args[*i])
-		}
-		return arg_v
-	}
-	return ""
 }
 
 func wc(file io.Reader, args arg) int {
