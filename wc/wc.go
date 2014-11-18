@@ -44,12 +44,14 @@ func help() {
 }
 
 func wc(file io.Reader, args arg, size int64) int64 {
+	// Default the count to the size passed in (i.e.: stat() on a file)
 	c := size
 
 	if file == nil {
 		file = os.Stdin
 	}
 
+	// Count bytes coming in through STDIN
 	if c == 0 && args.count_bytes {
 		s := bufio.NewScanner(file)
 		s.Split(bufio.ScanBytes)
@@ -58,6 +60,7 @@ func wc(file io.Reader, args arg, size int64) int64 {
 		}
 	}
 
+	// Count lines or words on STDIN or in the file passed in
 	if args.count_lines && !args.count_bytes {
 		c = 0
 		s := bufio.NewScanner(file)
@@ -102,17 +105,20 @@ func main() {
 		reached_files = true
 		args.file = append(args.file, arg_v)
 	}
+
 	if len(args.file) == 0 {
 		count := wc(nil, args, 0)
 		fmt.Fprintf(os.Stdout, "%d\n", count)
 	} else {
 		for i := range args.file {
+			// Call stat() on the file to help byte count performance
 			file, err := os.Open(args.file[i])
 			stat, err := file.Stat()
 			size := stat.Size()
 			if err != nil {
 				panic(err)
 			}
+
 			count := wc(file, args, size)
 			fmt.Fprintf(os.Stdout, "%d %s\n", count, args.file[i])
 		}

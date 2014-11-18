@@ -1,4 +1,3 @@
-// head -- print the front matter of file(s) or standard input
 // Part of goutils (https://github.com/trevorparker/goutils)
 //
 // Copyright (c) 2013-2014 Trevor Parker <trevor@trevorparker.com>
@@ -65,8 +64,11 @@ func head(file io.Reader, args arg) {
 	if file == nil {
 		file = os.Stdin
 	}
+
 	r := bufio.NewReader(file)
 	if args.bytes > 0 {
+		// Create a buffer to fill with the number of bytes
+		// requested
 		var buffer bytes.Buffer
 		for b := 0; b < args.bytes; b++ {
 			c, err := r.ReadByte()
@@ -79,6 +81,8 @@ func head(file io.Reader, args arg) {
 		}
 		os.Stdout.Write([]byte(buffer.String()))
 	} else {
+		// Write out each line until we reach the number of
+		// lines requested
 		for l := 0; l < args.count; l++ {
 			l, err := r.ReadBytes('\n')
 			if err == io.EOF {
@@ -134,6 +138,8 @@ func main() {
 		head(nil, args)
 	} else {
 		for i := range args.file {
+			// Print headers for the filenames if we are handling
+			// multiple files
 			if len(args.file) > 1 {
 				if i > 0 {
 					fmt.Fprintf(os.Stdout, "\n==> %s <==\n", args.file[i])
