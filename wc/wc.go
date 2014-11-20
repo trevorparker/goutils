@@ -106,11 +106,11 @@ func main() {
 		args.file = append(args.file, arg_v)
 	}
 
-	if len(args.file) == 0 {
-		count := wc(nil, args, 0)
-		fmt.Fprintf(os.Stdout, "%d\n", count)
-	} else {
-		for i := range args.file {
+	for i := range args.file {
+		if len(args.file) == 0 || args.file[0] == "-" {
+			count := wc(nil, args, 0)
+			fmt.Fprintf(os.Stdout, "%d\n", count)
+		} else {
 			// Call stat() on the file to help byte count performance
 			file, err := os.Open(args.file[i])
 			stat, err := file.Stat()
