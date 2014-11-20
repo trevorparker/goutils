@@ -107,7 +107,7 @@ func main() {
 	}
 
 	for i := range args.file {
-		if len(args.file) == 0 || args.file[0] == "-" {
+		if len(args.file) == 0 || args.file[i] == "-" {
 			count := wc(nil, args, 0)
 			fmt.Fprintf(os.Stdout, "%d\n", count)
 		} else {
