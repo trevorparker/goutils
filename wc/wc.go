@@ -16,20 +16,22 @@ import (
 )
 
 type arg struct {
-	count_bytes bool
-	count_lines bool
-	count_words bool
-	file        []string
+	count_bytes           bool
+	count_lines           bool
+	count_max_line_length bool
+	count_words           bool
+	file                  []string
 }
 
 const (
 	usage_message string = "usage: wc [OPTION ...] [FILE ...]"
 	help_message  string = `Count bytes, lines, or words for FILE or STDIN to STDOUT.
 
-  -c, --bytes     count bytes
-  -l, --lines     count newlines
-  -w, --words     count words
-  -h, --help      print this help message and exit
+  -c, --bytes              count bytes
+  -l, --lines              count newlines
+  -L, --max-line-length    count the length of the longest line
+  -w, --words              count words
+  -h, --help               print this help message and exit
 `
 )
 
@@ -68,6 +70,15 @@ func wc(file io.Reader, args arg, size int64) int64 {
 		for s.Scan() {
 			c++
 		}
+	} else if args.count_max_line_length && !args.count_bytes {
+		c = 0
+		s := bufio.NewScanner(file)
+		for s.Scan() {
+			line_length := int64(len(s.Text()))
+			if line_length > c {
+				c = line_length
+			}
+		}
 	} else if args.count_words && !args.count_bytes {
 		c = 0
 		s := bufio.NewScanner(file)
@@ -81,7 +92,7 @@ func wc(file io.Reader, args arg, size int64) int64 {
 }
 
 func main() {
-	args := arg{false, false, false, []string{}}
+	args := arg{false, false, false, false, []string{}}
 	reached_files := false
 	for i := 1; i < len(os.Args); i++ {
 		if reached_files == false {
@@ -94,6 +105,10 @@ func main() {
 			}
 			if os.Args[i] == "-l" || os.Args[i] == "--lines" {
 				args.count_lines = true
+				continue
+			}
+			if os.Args[i] == "-L" || os.Args[i] == "--max-line-length" {
+				args.count_max_line_length = true
 				continue
 			}
 			if os.Args[i] == "-w" || os.Args[i] == "--words" {
