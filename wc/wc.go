@@ -121,8 +121,13 @@ func main() {
 		args.file = append(args.file, arg_v)
 	}
 
+	if len(args.file) == 0 {
+		count := wc(nil, args, 0)
+		fmt.Fprintf(os.Stdout, "%d\n", count)
+	}
+
 	for i := range args.file {
-		if len(args.file) == 0 || args.file[i] == "-" {
+		if args.file[i] == "-" {
 			count := wc(nil, args, 0)
 			fmt.Fprintf(os.Stdout, "%d\n", count)
 		} else {
