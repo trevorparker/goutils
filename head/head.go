@@ -18,10 +18,11 @@ import (
 )
 
 type arg struct {
-	count int
-	bytes int
-	quiet bool
-	file  []string
+	count   int
+	bytes   int
+	quiet   bool
+	verbose bool
+	file    []string
 }
 
 const (
@@ -34,6 +35,7 @@ in. When no FILE is provided, read from STDIN.
   -n, --lines=N             print the first N lines of FILE or STDIN;
                                 default 10
   -q, --quiet, --silent     don't print file name headers
+  -v, --verbose             always print file name headers
   -h, --help                print this help message and exit
 `
 )
@@ -98,7 +100,7 @@ func head(file io.Reader, args arg) {
 }
 
 func main() {
-	args := arg{10, 0, false, []string{}}
+	args := arg{10, 0, false, false, []string{}}
 	reached_files := false
 	for i := 1; i < len(os.Args); i++ {
 		if reached_files == false {
@@ -126,6 +128,10 @@ func main() {
 				args.quiet = true
 				continue
 			}
+			if os.Args[i] == "-v" || os.Args[i] == "--verbose" {
+				args.verbose = true
+				continue
+			}
 			arg_v = parse_args(os.Args, &i, "-", "-")
 			if arg_v != "" {
 				args.count, err = strconv.Atoi(arg_v)
@@ -146,7 +152,7 @@ func main() {
 		for i := range args.file {
 			// Print headers for the filenames if we are handling
 			// multiple files
-			if len(args.file) > 1 && !args.quiet {
+			if len(args.file) > 1 && !args.quiet || args.verbose {
 				if i > 0 {
 					fmt.Fprintf(os.Stdout, "\n==> %s <==\n", args.file[i])
 				} else {
