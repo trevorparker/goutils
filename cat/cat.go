@@ -102,7 +102,7 @@ func cat(file io.Reader, args arg) {
 			}
 
 			if args.show_tabs && this_rune == tab {
-				w.Write([]byte("^I"))
+				fmt.Fprintf(w, "^%c", this_rune+64)
 				continue
 			} else if this_rune == newline {
 				newline_next = true
