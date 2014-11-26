@@ -40,11 +40,23 @@ func help() {
 }
 
 func ls(file string, args arg) {
-	entries, err := ioutil.ReadDir(file)
+	entries := make([]os.FileInfo, 0)
+
+	// Determine if this is a file or directory, then call out
+	// to ReadDir if it's a directory. Otherwise, we're can just
+	// pass the file info on.
+	fi, err := os.Stat(file)
 	if err != nil {
 		panic(err)
+	} else if fi.IsDir() {
+		e, err := ioutil.ReadDir(file)
+		if err != nil {
+			panic(err)
+		}
+		entries = e
+	} else {
+		entries = append(entries, fi)
 	}
-
 	printEntries(&entries, &args)
 }
 
