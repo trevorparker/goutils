@@ -13,10 +13,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 type arg struct {
 	file         []string
+	almost_all   bool
 	one_per_line bool
 }
 
@@ -24,8 +26,10 @@ const (
 	usage_message string = "usage: ls [OPTION ...] [FILE ...]"
 	help_message  string = `List files and directories, and information about them.
 
-  -1             print one entry per line
-  -h, --help     print this help message and exit
+  -A, --almost-all     include entries beginning with a dot, except
+                       implied . and ..
+  -1                   print one entry per line
+  -h, --help           print this help message and exit
 `
 )
 
@@ -63,14 +67,16 @@ func ls(file string, args arg) {
 func printEntries(entries *[]os.FileInfo, args *arg) {
 	var out bytes.Buffer
 
+	filtered_entries := filterEntries(entries, args)
+
 	if args.one_per_line {
-		for _, e := range *entries {
+		for _, e := range filtered_entries {
 			out.WriteString(fmt.Sprintf("%s\n", e.Name()))
 		}
 		fmt.Print(out.String())
 	} else {
 		longest_entry := 0
-		for _, e := range *entries {
+		for _, e := range filtered_entries {
 			length := len(e.Name())
 			if length > longest_entry {
 				longest_entry = length + 1
@@ -79,7 +85,7 @@ func printEntries(entries *[]os.FileInfo, args *arg) {
 
 		columns := int(78 / longest_entry)
 		formatted_string := fmt.Sprintf("%%-%ds", longest_entry)
-		for i, e := range *entries {
+		for i, e := range filtered_entries {
 			out.WriteString(fmt.Sprintf(formatted_string, e.Name()))
 			if i%columns == columns-1 {
 				out.WriteString("\n")
@@ -87,6 +93,18 @@ func printEntries(entries *[]os.FileInfo, args *arg) {
 		}
 		fmt.Println(out.String())
 	}
+}
+
+func filterEntries(entries *[]os.FileInfo, args *arg) []os.FileInfo {
+	filtered_entries := make([]os.FileInfo, 0)
+	for _, e := range *entries {
+		if !args.almost_all && strings.HasPrefix(e.Name(), ".") {
+			continue
+		}
+		filtered_entries = append(filtered_entries, e)
+	}
+
+	return filtered_entries
 }
 
 func main() {
@@ -97,6 +115,10 @@ func main() {
 		if reached_files == false {
 			if os.Args[i] == "-h" || os.Args[i] == "--help" {
 				help()
+			}
+			if os.Args[i] == "-A" {
+				args.almost_all = true
+				continue
 			}
 			if os.Args[i] == "-1" {
 				args.one_per_line = true
