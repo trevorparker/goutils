@@ -17,9 +17,10 @@ import (
 )
 
 type arg struct {
-	file         []string
-	almost_all   bool
-	one_per_line bool
+	file            []string
+	almost_all      bool
+	comma_separated bool
+	one_per_line    bool
 }
 
 const (
@@ -28,6 +29,7 @@ const (
 
   -A, --almost-all     include entries beginning with a dot, except
                        implied . and ..
+  -m                   print a comma-separated list of entries
   -1                   print one entry per line
   -h, --help           print this help message and exit
 `
@@ -74,6 +76,14 @@ func printEntries(entries *[]os.FileInfo, args *arg) {
 			out.WriteString(fmt.Sprintf("%s\n", e.Name()))
 		}
 		fmt.Print(out.String())
+	} else if args.comma_separated {
+		for i, e := range filtered_entries {
+			out.WriteString(e.Name())
+			if i < len(filtered_entries)-1 {
+				out.WriteString(", ")
+			}
+		}
+		fmt.Println(out.String())
 	} else {
 		longest_entry := 0
 		for _, e := range filtered_entries {
@@ -118,6 +128,10 @@ func main() {
 			}
 			if os.Args[i] == "-A" {
 				args.almost_all = true
+				continue
+			}
+			if os.Args[i] == "-m" {
+				args.comma_separated = true
 				continue
 			}
 			if os.Args[i] == "-1" {
