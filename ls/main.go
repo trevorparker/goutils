@@ -85,7 +85,7 @@ func printEntries(entries *[]os.FileInfo, args *arg) {
 		}
 		fmt.Println(out.String())
 	} else {
-		longest_entry := 0
+		longest_entry := 1
 		for _, e := range filtered_entries {
 			length := len(e.Name())
 			if length > longest_entry {
