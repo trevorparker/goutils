@@ -20,6 +20,7 @@ type arg struct {
 	file            []string
 	almost_all      bool
 	comma_separated bool
+	quote_name      bool
 	one_per_line    bool
 }
 
@@ -30,6 +31,7 @@ const (
   -A, --almost-all     include entries beginning with a dot, except
                        implied . and ..
   -m                   print a comma-separated list of entries
+  -Q, --quote-name     print each entry surrounded by double quotes
   -1                   print one entry per line
   -h, --help           print this help message and exit
 `
@@ -73,12 +75,20 @@ func printEntries(entries *[]os.FileInfo, args *arg) {
 
 	if args.one_per_line {
 		for _, e := range filtered_entries {
-			out.WriteString(fmt.Sprintf("%s\n", e.Name()))
+			name := e.Name()
+			if args.quote_name {
+				name = fmt.Sprintf("\"%s\"", e.Name())
+			}
+			out.WriteString(fmt.Sprintf("%s\n", name))
 		}
 		fmt.Print(out.String())
 	} else if args.comma_separated {
 		for i, e := range filtered_entries {
-			out.WriteString(e.Name())
+			name := e.Name()
+			if args.quote_name {
+				name = fmt.Sprintf("\"%s\"", e.Name())
+			}
+			out.WriteString(name)
 			if i < len(filtered_entries)-1 {
 				out.WriteString(", ")
 			}
@@ -87,7 +97,11 @@ func printEntries(entries *[]os.FileInfo, args *arg) {
 	} else {
 		longest_entry := 1
 		for _, e := range filtered_entries {
-			length := len(e.Name())
+			name := e.Name()
+			if args.quote_name {
+				name = fmt.Sprintf("\"%s\"", e.Name())
+			}
+			length := len(name)
 			if length > longest_entry {
 				longest_entry = length + 1
 			}
@@ -96,7 +110,11 @@ func printEntries(entries *[]os.FileInfo, args *arg) {
 		columns := int(78 / longest_entry)
 		formatted_string := fmt.Sprintf("%%-%ds", longest_entry)
 		for i, e := range filtered_entries {
-			out.WriteString(fmt.Sprintf(formatted_string, e.Name()))
+			name := e.Name()
+			if args.quote_name {
+				name = fmt.Sprintf("\"%s\"", e.Name())
+			}
+			out.WriteString(fmt.Sprintf(formatted_string, name))
 			if i%columns == columns-1 {
 				out.WriteString("\n")
 			}
@@ -132,6 +150,10 @@ func main() {
 			}
 			if os.Args[i] == "-m" {
 				args.comma_separated = true
+				continue
+			}
+			if os.Args[i] == "-Q" || os.Args[i] == "--quote-name" {
+				args.quote_name = true
 				continue
 			}
 			if os.Args[i] == "-1" {
