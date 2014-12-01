@@ -144,7 +144,7 @@ func main() {
 			if os.Args[i] == "-h" || os.Args[i] == "--help" {
 				help()
 			}
-			if os.Args[i] == "-A" {
+			if os.Args[i] == "-A" || os.Args[i] == "--almost-all" {
 				args.almost_all = true
 				continue
 			}
