@@ -14,6 +14,8 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"syscall"
+	"unsafe"
 )
 
 type arg struct {
@@ -109,7 +111,14 @@ func printEntries(entries *[]os.FileInfo, args *arg) {
 			}
 		}
 
-		columns := int(78 / longest_entry)
+		// Determine the number of columns to show based on terminal size
+		// and longest entry length
+		terminal_width, _, err := getTerminalSize()
+		if err != nil {
+			terminal_width = 78
+		}
+		columns := int(terminal_width / longest_entry)
+
 		formatted_string := fmt.Sprintf("%%-%ds", longest_entry)
 		for i, e := range filtered_entries {
 			name := e.Name()
@@ -138,6 +147,24 @@ func filterEntries(entries *[]os.FileInfo, args *arg) []os.FileInfo {
 	}
 
 	return filtered_entries
+}
+
+// This bit thanks in part to:
+// - https://code.google.com/p/go/source/browse/ssh/terminal/util.go?repo=crypto#75 and
+// - http://stackoverflow.com/questions/16569433/get-terminal-size-in-go
+func getTerminalSize() (width, height int, err error) {
+	var dimensions [4]uint16
+
+	ret, _, err := syscall.Syscall(syscall.SYS_IOCTL,
+		uintptr(syscall.Stdin),
+		uintptr(syscall.TIOCGWINSZ),
+		uintptr(unsafe.Pointer(&dimensions)))
+
+	if ret != 0 {
+		return -1, -1, err
+	}
+
+	return int(dimensions[1]), int(dimensions[0]), nil
 }
 
 func main() {
