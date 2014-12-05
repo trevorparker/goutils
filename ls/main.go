@@ -19,6 +19,7 @@ import (
 type arg struct {
 	file            []string
 	almost_all      bool
+	ignore_backups  bool
 	comma_separated bool
 	quote_name      bool
 	one_per_line    bool
@@ -28,12 +29,13 @@ const (
 	usage_message string = "usage: ls [OPTION ...] [FILE ...]"
 	help_message  string = `List files and directories, and information about them.
 
-  -A, --almost-all     include entries beginning with a dot, except
-                       implied . and ..
-  -m                   print a comma-separated list of entries
-  -Q, --quote-name     print each entry surrounded by double quotes
-  -1                   print one entry per line
-  -h, --help           print this help message and exit
+  -A, --almost-all      include entries beginning with a dot, except
+                        implied . and ..
+  -B, --ignore-backups  do not list entries ending with ~
+  -m                    print a comma-separated list of entries
+  -Q, --quote-name      print each entry surrounded by double quotes
+  -1                    print one entry per line
+  -h, --help            print this help message and exit
 `
 )
 
@@ -129,6 +131,9 @@ func filterEntries(entries *[]os.FileInfo, args *arg) []os.FileInfo {
 		if !args.almost_all && strings.HasPrefix(e.Name(), ".") {
 			continue
 		}
+		if args.ignore_backups && strings.HasSuffix(e.Name(), "~") {
+			continue
+		}
 		filtered_entries = append(filtered_entries, e)
 	}
 
@@ -146,6 +151,10 @@ func main() {
 			}
 			if os.Args[i] == "-A" || os.Args[i] == "--almost-all" {
 				args.almost_all = true
+				continue
+			}
+			if os.Args[i] == "-B" || os.Args[i] == "--ignore-backups" {
+				args.ignore_backups = true
 				continue
 			}
 			if os.Args[i] == "-m" {
