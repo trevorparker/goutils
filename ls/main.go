@@ -77,6 +77,13 @@ func printEntries(entries *[]os.FileInfo, args *arg) {
 
 	filtered_entries := filterEntries(entries, args)
 
+	// Determine the terminal width, useful for column and line
+	// wrapping calculations.
+	terminal_width, _, err := getTerminalSize()
+	if err != nil {
+		terminal_width = 78
+	}
+
 	if args.one_per_line {
 		for _, e := range filtered_entries {
 			name := e.Name()
@@ -88,14 +95,24 @@ func printEntries(entries *[]os.FileInfo, args *arg) {
 		fmt.Print(out.String())
 	} else if args.comma_separated {
 		for i, e := range filtered_entries {
+			var scratch bytes.Buffer
 			name := e.Name()
 			if args.quote_name {
 				name = fmt.Sprintf("\"%s\"", e.Name())
 			}
-			out.WriteString(name)
+			scratch.WriteString(name)
 			if i < len(filtered_entries)-1 {
-				out.WriteString(", ")
+				scratch.WriteString(", ")
 			}
+
+			// Finish out this line if we're going to hit the
+			// terminal width. The next entry will wrap to the
+			// next line.
+			if out.Len()+scratch.Len() >= terminal_width {
+				fmt.Println(out.String())
+				out.Reset()
+			}
+			out.WriteString(scratch.String())
 		}
 		fmt.Println(out.String())
 	} else {
@@ -111,12 +128,6 @@ func printEntries(entries *[]os.FileInfo, args *arg) {
 			}
 		}
 
-		// Determine the number of columns to show based on terminal size
-		// and longest entry length
-		terminal_width, _, err := getTerminalSize()
-		if err != nil {
-			terminal_width = 78
-		}
 		columns := int(terminal_width / longest_entry)
 
 		formatted_string := fmt.Sprintf("%%-%ds", longest_entry)
