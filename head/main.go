@@ -52,7 +52,17 @@ func help() {
 
 func parse_args(args []string, i *int, s string, l string) (arg_v string) {
 	if strings.HasPrefix(args[*i], s) || strings.HasPrefix(args[*i], l) {
-		arg_v := strings.Trim(args[*i], s)
+		arg_v := strings.Trim(args[*i], l)
+		if len(arg_v) == 0 && len(args)-1 > *i {
+			*i++
+			arg_v = args[*i]
+			return arg_v
+		} else if strings.HasPrefix(arg_v, "=") {
+			arg_v = arg_v[1:len(arg_v)]
+			return arg_v
+		}
+
+		arg_v = strings.Trim(args[*i], s)
 		if len(arg_v) == 0 && len(args)-1 > *i {
 			*i++
 			arg_v = args[*i]
